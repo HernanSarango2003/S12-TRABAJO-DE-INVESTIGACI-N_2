@@ -1,0 +1,55 @@
+{% extends "components/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container">
+    <h1 class="mb-4">Detalle de Costo de Atención</h1>
+
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Información General</h5>
+            <dl class="row">
+                <dt class="col-sm-3">Atención:</dt>
+                <dd class="col-sm-9">{{ costo.atencion }}</dd>
+
+                <dt class="col-sm-3">Total:</dt>
+                <dd class="col-sm-9">${{ costo.total }}</dd>
+
+                <dt class="col-sm-3">Fecha de Pago:</dt>
+                <dd class="col-sm-9">{{ costo.fecha_pago|date:"d/m/Y H:i" }}</dd>
+            </dl>
+
+            <h5 class="card-title mt-4">Servicios Adicionales</h5>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Costo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for detalle in costo.costos_atenciones.all %}
+                        <tr>
+                            <td>{{ detalle.servicios_adicionales }}</td>
+                            <td>${{ detalle.costo_servicio }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center">No hay servicios adicionales registrados.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="card-footer">
+            <a href="{% url 'attention:costos_atencion_update' costo.pk %}" class="btn btn-warning">
+                Editar
+            </a>
+            <a href="{% url 'attention:costos_atencion_list' %}" class="btn btn-secondary">
+                Volver
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

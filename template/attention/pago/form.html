@@ -1,0 +1,148 @@
+{% extends "components/base.html" %}
+{% load static %}
+{% block title %}Registrar Pago{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+        <div class="bg-white rounded-lg shadow-md">
+            <div class="border-b border-gray-200 px-6 py-4">
+                <h4 class="text-xl font-semibold text-gray-800">Registrar Nuevo Pago</h4>
+            </div>
+            
+            <div class="p-6">
+                {% if form.non_field_errors %}
+                <div class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <form method="post" id="pagoForm">
+                    {% csrf_token %}
+                    
+                    {# Campo paciente #}
+                    <div class="mb-6">
+                        <label for="{{ form.paciente.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Paciente
+                        </label>
+                        <div class="relative">
+                            {{ form.paciente }}
+                            {% if form.paciente.errors %}
+                            <div class="text-red-500 text-sm mt-1">
+                                {{ form.paciente.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Campo costo_atencion #}
+                    <div class="mb-6">
+                        <label for="{{ form.costo_atencion.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Costo de Atención
+                        </label>
+                        <div class="relative">
+                            {{ form.costo_atencion }}
+                            {% if form.costo_atencion.errors %}
+                            <div class="text-red-500 text-sm mt-1">
+                                {{ form.costo_atencion.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Mostrar detalles del costo cuando se seleccione #}
+                    <div id="costoDetails" class="mb-6 hidden">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <h5 class="text-lg font-medium text-blue-900 mb-2">Detalles del Costo</h5>
+                            <div id="costoTotal" class="text-2xl text-blue-600 font-bold mb-1"></div>
+                            <div id="costoPaciente" class="text-gray-600"></div>
+                        </div>
+                    </div>
+
+                    {# Campo método de pago #}
+                    <div class="mb-6">
+                        <label for="{{ form.metodo_pago.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                            Método de Pago
+                        </label>
+                        <div class="relative">
+                            {{ form.metodo_pago }}
+                            {% if form.metodo_pago.errors %}
+                            <div class="text-red-500 text-sm mt-1">
+                                {{ form.metodo_pago.errors }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Botones de acción #}
+                    <div class="flex justify-between items-center pt-4 border-t border-gray-200">
+                        <a href="{% url 'attention:pago_list' %}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i class="fas fa-arrow-left mr-2"></i> Volver
+                        </a>
+                        <button type="submit" 
+                                class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <i class="fas fa-save mr-2"></i> Procesar Pago
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const costoAtencionSelect = document.getElementById('id_costo_atencion');
+    const costoDetails = document.getElementById('costoDetails');
+    const costoTotal = document.getElementById('costoTotal');
+    const costoPaciente = document.getElementById('costoPaciente');
+    const metodoPagoSelect = document.getElementById('id_metodo_pago');
+    const submitButton = document.querySelector('button[type="submit"]');
+
+    // Función para actualizar los detalles del costo
+    async function updateCostoDetails() {
+        const costoId = costoAtencionSelect.value;
+        if (costoId) {
+            try {
+                const response = await fetch(`/api/costos-atencion/${costoId}/`);
+                const data = await response.json();
+                
+                costoDetails.classList.remove('hidden');
+                costoTotal.textContent = `Total a pagar: $${data.total}`;
+                costoPaciente.textContent = `Paciente: ${data.paciente_nombre}`;
+                
+                // Actualizar el texto del botón según el método de pago
+                updateSubmitButton();
+            } catch (error) {
+                console.error('Error al obtener detalles del costo:', error);
+                costoDetails.classList.add('hidden');
+            }
+        } else {
+            costoDetails.classList.add('hidden');
+        }
+    }
+
+    // Función para actualizar el texto del botón
+    function updateSubmitButton() {
+        const metodoPago = metodoPagoSelect.value;
+        const submitButton = document.querySelector('button[type="submit"]');
+        submitButton.innerHTML = metodoPago === 'PayPal' 
+            ? '<i class="fab fa-paypal mr-2"></i> Pagar con PayPal'
+            : '<i class="fas fa-money-bill-wave mr-2"></i> Registrar Pago en Efectivo';
+    }
+
+    // Event listeners
+    costoAtencionSelect.addEventListener('change', updateCostoDetails);
+    metodoPagoSelect.addEventListener('change', updateSubmitButton);
+
+    // Inicializar si hay valores preseleccionados
+    if (costoAtencionSelect.value) {
+        updateCostoDetails();
+    }
+});
+</script>
+{% endblock %}

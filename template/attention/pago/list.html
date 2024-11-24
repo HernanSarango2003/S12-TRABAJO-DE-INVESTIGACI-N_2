@@ -1,0 +1,42 @@
+{% extends "components/base.html" %}
+{% load static %}
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/list.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12 col-lg-12 px-md-4 main-content">
+            <h2 class="text-primary-emphasis mb-4 fw-bold">Lista de Pagos</h2>
+            <a href="{% url 'attention:pago_create' %}" class="btn btn-primary mb-3">Registrar Pago</a>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Paciente</th>
+                        <th>Costo Atención</th>
+                        <th>Método de Pago</th>
+                        <th>Pagado</th>
+                        <th>Fecha de Pago</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td>{{ pago.paciente }}</td>
+                        <td>{{ pago.costo_atencion }}</td>
+                        <td>{{ pago.metodo_pago }}</td>
+                        <td>{{ pago.pagado }}</td>
+                        <td>{{ pago.fecha_pago }}</td>
+                        <td>
+                            <a href="{% url 'attention:pago_detail' pago.pk %}" class="btn btn-info btn-sm">Detalles</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

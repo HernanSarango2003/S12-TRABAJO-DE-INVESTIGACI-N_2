@@ -1,0 +1,93 @@
+{% extends "components/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .detail-card {
+        transition: all 0.3s ease;
+    }
+    .detail-card:hover {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    .service-row {
+        transition: background-color 0.2s ease;
+    }
+    .service-row:hover {
+        background-color: rgba(59, 130, 246, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Detalle de Costo de Atención</h1>
+
+    <div class="card detail-card bg-white rounded-lg shadow">
+        <div class="card-body p-6">
+            <!-- Información General -->
+            <h5 class="text-xl font-semibold text-gray-800 mb-4">Información General</h5>
+            <dl class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <dt class="text-sm font-medium text-gray-500">Atención:</dt>
+                    <dd class="mt-1 text-lg text-gray-900">{{ pago.paciente.nombres }}</dd>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <dt class="text-sm font-medium text-gray-500">Total:</dt>
+                    <dd class="mt-1 text-lg font-semibold text-blue-600">${{ pago.costo_atencion.total }}</dd>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <dt class="text-sm font-medium text-gray-500">Fecha de Pago:</dt>
+                    <dd class="mt-1 text-lg text-gray-900">{{ pago.fecha_pago|date:"d/m/Y H:i" }}</dd>
+                </div>
+            </dl>
+
+            <!-- Servicios Adicionales -->
+            <h5 class="text-xl font-semibold text-gray-800 mb-4">Servicios Adicionales</h5>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Servicio
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Costo
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for detalle in costo.costos_atenciones.all %}
+                        <tr class="service-row">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                {{ detalle.servicios_adicionales }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                ${{ detalle.costo_servicio }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="px-6 py-4 text-center text-sm text-gray-500">
+                                No hay servicios adicionales registrados.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-gray-50 px-6 py-4 border-t border-gray-200">
+            <div class="flex justify-end space-x-3">
+                <a href="{% url 'attention:pago_list' %}" 
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                    <i class="fas fa-arrow-left mr-2"></i>Volver
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
